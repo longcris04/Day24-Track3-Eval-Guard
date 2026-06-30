@@ -9,6 +9,11 @@ load_dotenv()
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "")
 HF_TOKEN = os.getenv("HF_TOKEN", "")  # Optional: for HuggingFace models
 
+# --- OpenRouter (fallback LLM when no OpenAI key; used by Day 18 src/ modules) ---
+OPENROUTER_API_KEY = os.getenv("OPENROUTER_API_KEY", "")
+OPENROUTER_BASE_URL = os.getenv("OPENROUTER_BASE_URL", "https://openrouter.ai/api/v1")
+OPENROUTER_MODEL = os.getenv("OPENROUTER_MODEL", "openai/gpt-4o-mini")
+
 # --- Qdrant (same as Day 18) ---
 QDRANT_HOST = "localhost"
 QDRANT_PORT = 6333

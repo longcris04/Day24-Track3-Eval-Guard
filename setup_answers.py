@@ -75,20 +75,25 @@ def build_pipeline():
 
 
 def run_query(q: str, search, reranker, top_k: int) -> tuple[str, list[str]]:
-    from config import OPENAI_API_KEY
+    from config import (OPENAI_API_KEY, OPENROUTER_API_KEY,
+                        OPENROUTER_BASE_URL, OPENROUTER_MODEL)
 
     results = search.search(q)
     docs    = [{"text": r.text, "score": r.score, "metadata": r.metadata} for r in results]
     reranked = reranker.rerank(q, docs, top_k=top_k)
     contexts = [r.text for r in reranked] if reranked else [r.text for r in results[:3]]
 
-    if OPENAI_API_KEY and contexts:
+    if (OPENAI_API_KEY or OPENROUTER_API_KEY) and contexts:
         try:
             from openai import OpenAI
-            client = OpenAI()
+            if OPENAI_API_KEY:
+                client, model = OpenAI(api_key=OPENAI_API_KEY), "gpt-4o-mini"
+            else:
+                client = OpenAI(api_key=OPENROUTER_API_KEY, base_url=OPENROUTER_BASE_URL)
+                model = OPENROUTER_MODEL
             ctx = "\n\n".join(contexts)
             resp = client.chat.completions.create(
-                model="gpt-4o-mini",
+                model=model,
                 messages=[
                     {"role": "system", "content": "Trả lời CHỈ dựa trên context. Nếu không có → nói 'Không tìm thấy.'"},
                     {"role": "user",   "content": f"Context:\n{ctx}\n\nCâu hỏi: {q}"},
